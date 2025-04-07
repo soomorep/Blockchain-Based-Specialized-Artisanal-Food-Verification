@@ -1,30 +1,76 @@
+;; production-method.clar
+;; This contract documents traditional techniques used in production
 
-;; title: production-method
-;; version:
-;; summary:
-;; description:
+(define-data-var contract-owner principal tx-sender)
 
-;; traits
-;;
+;; Map of production methods by ID
+(define-map production-methods
+  { method-id: uint }
+  {
+    name: (string-ascii 100),
+    description: (string-utf8 500),
+    traditional: bool,
+    region: (string-ascii 100),
+    registered-by: principal
+  }
+)
 
-;; token definitions
-;;
+;; Map of products to their production methods
+(define-map product-methods
+  { product-id: uint }
+  { methods: (list 10 uint) }
+)
 
-;; constants
-;;
+;; Counter for unique method IDs
+(define-data-var method-counter uint u0)
 
-;; data vars
-;;
+;; Register a new production method
+(define-public (register-method
+                (name (string-ascii 100))
+                (description (string-utf8 500))
+                (traditional bool)
+                (region (string-ascii 100)))
+  (let ((method-id (+ (var-get method-counter) u1)))
+    (begin
+      (var-set method-counter method-id)
+      (ok (map-set production-methods
+        { method-id: method-id }
+        {
+          name: name,
+          description: description,
+          traditional: traditional,
+          region: region,
+          registered-by: tx-sender
+        }
+      ))
+    )
+  )
+)
 
-;; data maps
-;;
+;; Associate methods with a product
+(define-public (set-product-methods (product-id uint) (methods (list 10 uint)))
+  (begin
+    (ok (map-set product-methods
+      { product-id: product-id }
+      { methods: methods }
+    ))
+  )
+)
 
-;; public functions
-;;
+;; Get method details
+(define-read-only (get-method-details (method-id uint))
+  (map-get? production-methods { method-id: method-id })
+)
 
-;; read only functions
-;;
+;; Get product methods
+(define-read-only (get-product-methods (product-id uint))
+  (map-get? product-methods { product-id: product-id })
+)
 
-;; private functions
-;;
-
+;; Transfer contract ownership
+(define-public (transfer-ownership (new-owner principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) (err u1))
+    (ok (var-set contract-owner new-owner))
+  )
+)
