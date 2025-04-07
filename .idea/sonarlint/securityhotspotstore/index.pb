@@ -11,3 +11,5 @@ T
 $contracts/producer-verification.clar,b/a/ba270fdc20b9306cd425b5cdfadfe60417ecc105
 P
  contracts/production-method.clar,9/2/924a6c3b7627335dbadb83b7b7c13a1d5271c0a4
+S
+#tests/producer-verification.test.ts,b/9/b93ddf9a8533cd1526a8d66eb48db6d7137cf588
